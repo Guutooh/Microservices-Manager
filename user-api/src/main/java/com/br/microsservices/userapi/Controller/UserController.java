@@ -2,9 +2,9 @@ package com.br.microsservices.userapi.Controller;
 
 import com.br.microsservices.userapi.Dto.UserDTO;
 import jakarta.annotation.PostConstruct;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,6 +17,29 @@ public class UserController {
     @GetMapping
     public List<UserDTO> getUser(){
         return usuarios;
+    }
+
+    @GetMapping("/{cpf}")
+    public UserDTO getUserFiltro(@PathVariable String cpf){
+        return usuarios
+                .stream()
+                .filter(userDTO -> userDTO.getCpf().equals(cpf))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserDTO criar (@Valid @RequestBody UserDTO userDTO){
+        userDTO.setDataCadastro(LocalDateTime.now());
+        usuarios.add(userDTO);
+        return userDTO;
+    }
+
+    @DeleteMapping("/{cpf}")
+    public boolean remover(@PathVariable String cpf) {
+        return usuarios
+            .removeIf(userDTO -> userDTO.getCpf().equals(cpf));
     }
 
     public static List<UserDTO> usuarios = new ArrayList<>();
