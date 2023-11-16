@@ -1,5 +1,6 @@
 package com.br.microsservices.userapi.Dto;
 
+import com.br.microsservices.userapi.Model.User;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -22,5 +23,19 @@ public class UserDTO {
     private String telefone;
 
     private LocalDateTime dataCadastro;
+
+    public static UserDTO convert(User user) {
+
+        UserDTO userDTO = new UserDTO();
+
+        userDTO.setNome(user.getNome());
+        userDTO.setEndereco(user.getEndereco());
+        userDTO.setCpf(user.getCpf());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setTelefone(user.getTelefone());
+        userDTO.setDataCadastro(user.getDataCadastro());
+        return userDTO;
+    }
+
 }
 
