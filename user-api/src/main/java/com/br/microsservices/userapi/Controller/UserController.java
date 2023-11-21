@@ -1,8 +1,12 @@
 package com.br.microsservices.userapi.Controller;
 
 import com.br.microsservices.userapi.Dto.UserDTO;
+import com.br.microsservices.userapi.Service.UserService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,34 +16,53 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
 
+    private final UserService userService;
+
     @GetMapping
-    public List<UserDTO> getUser(){
-        return usuarios;
+    public List<UserDTO> ListarUsuarios() {
+        return userService.ListarTodos();
     }
 
-    @GetMapping("/{cpf}")
-    public UserDTO getUserFiltro(@PathVariable String cpf){
-        return usuarios
-                .stream()
-                .filter(userDTO -> userDTO.getCpf().equals(cpf))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    @GetMapping("/{id}")
+    public UserDTO PorId(@PathVariable Long id) {
+        return userService.procuraPorId(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDTO criar (@Valid @RequestBody UserDTO userDTO){
-        userDTO.setDataCadastro(LocalDateTime.now());
-        usuarios.add(userDTO);
-        return userDTO;
+    public UserDTO criar(@Valid @RequestBody UserDTO userDTO) {
+
+        return userService.salvar(userDTO);
     }
 
-    @DeleteMapping("/{cpf}")
-    public boolean remover(@PathVariable String cpf) {
-        return usuarios
-            .removeIf(userDTO -> userDTO.getCpf().equals(cpf));
+    @GetMapping("/{cpf}/cpf")
+    public UserDTO PorCpf(@PathVariable String cpf) {
+        return userService.procuraPorCpf(cpf);
+    }
+
+    @DeleteMapping("/{id}")
+    public UserDTO remover(@PathVariable Long id) {
+        return userService.remover(id);
+    }
+
+    @GetMapping("/procura")
+    public List<UserDTO> queryByName(
+            @RequestParam(name = "nome", required = true) String nome) {
+
+        return userService.procuraPorNome(nome);
+    }
+
+    @PatchMapping("/{id}")
+    public UserDTO Editar(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        return userService.Editar(id, userDTO);
+    }
+
+    @GetMapping("/pageable")
+    public Page<UserDTO> PorPagina(Pageable pageable) {
+        return userService.getAllPage(pageable);
     }
 
     public static List<UserDTO> usuarios = new ArrayList<>();
